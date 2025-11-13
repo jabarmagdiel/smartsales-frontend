@@ -52,10 +52,29 @@ interface ClientStats {
   order_status_distribution: { [key: string]: number };
 }
 
+interface DashboardStats {
+  totalOrders: number;
+  totalRevenue: string;
+  totalProducts: number;
+  totalCustomers: number;
+  recentOrders: {
+    id: number;
+    customer: string;
+    total: string;
+    status: string;
+  }[];
+  lowStockProducts: {
+    name: string;
+    stock: number;
+    sku: string;
+  }[];
+}
+
 export default function DashboardPage() {
   const { isAuthenticated, userRole } = useAuth();
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [clientStats, setClientStats] = useState<ClientStats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [userName, setUserName] = useState<string>('Usuario');
@@ -300,7 +319,7 @@ export default function DashboardPage() {
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">📋 Órdenes Recientes</h3>
               <div className="space-y-3">
-                {stats?.recentOrders.map((order) => (
+                {stats?.recentOrders.map((order: { id: number; customer: string; total: string; status: string }) => (
                   <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900">#{order.id}</p>
@@ -324,7 +343,7 @@ export default function DashboardPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">⚠️ Stock Bajo</h3>
               <div className="space-y-3">
-                {stats?.lowStockProducts.map((product, index) => (
+                {stats?.lowStockProducts.map((product: { name: string; stock: number; sku: string }, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                     <div>
                       <p className="font-medium text-gray-900">{product.name}</p>
