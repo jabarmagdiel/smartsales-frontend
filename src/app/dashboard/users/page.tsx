@@ -12,6 +12,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [q, setQ] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
 
   // --- ESTADO PARA MANEJAR EL MODAL (CREAR/EDITAR) ---
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,6 +42,8 @@ export default function UsersPage() {
 
   // Handler para refrescar la tabla cuando el modal termine
   const handleSave = () => {
+    setInfo('Cambios guardados correctamente.');
+    setTimeout(() => setInfo(null), 2500);
     fetchData();
   };
 
@@ -56,12 +61,15 @@ export default function UsersPage() {
 
   // Handler para Toggle Status (Activar/Desactivar)
   const handleToggleStatus = async (id: number, newStatus: boolean) => {
+
     const action = newStatus ? 'activar' : 'desactivar';
     // NOTA: window.confirm() puede no funcionar en todos los entornos, 
     // pero lo dejamos como estaba en tu código original.
     if (window.confirm(`¿Estás seguro de que quieres ${action} este usuario?`)) {
       try {
         await toggleUserStatus(id, newStatus);
+        setInfo(`Usuario ${newStatus ? 'activado' : 'desactivado'} correctamente.`);
+        setTimeout(() => setInfo(null), 2500);
         fetchData(); // Refresca la tabla
       } catch (err: any) {
         setError(err.message || `Error al ${action} el usuario.`);
@@ -71,9 +79,12 @@ export default function UsersPage() {
 
   // Handler para Eliminar Permanente
   const handleDelete = async (id: number) => {
+
     if (window.confirm('¿Estás seguro de que quieres eliminar permanentemente este usuario? Esta acción no se puede deshacer.')) {
       try {
         await deleteUser(id);
+        setInfo('Usuario eliminado.');
+        setTimeout(() => setInfo(null), 2500);
         fetchData(); // Refresca la tabla
       } catch (err: any) {
         setError(err.message || 'Error al eliminar el usuario.');
@@ -88,9 +99,9 @@ export default function UsersPage() {
       </div>
     );
   }
-  
+
   if (error) {
-     return (
+    return (
       <div className="flex items-center justify-center p-10">
         <p className="text-lg text-red-600 bg-red-100 p-4 rounded-md border border-red-300">{error}</p>
       </div>
@@ -111,6 +122,27 @@ export default function UsersPage() {
         </button>
       </div>
 
+      {info && (
+        <div className="mb-4 p-3 rounded border border-green-300 bg-green-100 text-green-700">{info}</div>
+      )}
+
+      {/* Filtros */}
+      <div className="bg-white rounded shadow p-3 mb-4 grid md:grid-cols-3 gap-3">
+        <div>
+          <label className="text-sm text-gray-600">Buscar</label>
+          <input value={q} onChange={(e) => setQ(e.target.value)} className="mt-1 w-full border rounded p-2 text-gray-900" placeholder="Nombre, usuario o email" />
+        </div>
+        <div>
+          <label className="text-sm text-gray-600">Rol</label>
+          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="mt-1 w-full border rounded p-2 text-gray-900">
+            <option value="">Todos</option>
+            <option value="ADMIN">ADMIN</option>
+            <option value="OPERATOR">OPERATOR</option>
+            <option value="CLIENT">CLIENT</option>
+          </select>
+        </div>
+      </div>
+
       {/* --- Tabla de Usuarios --- */}
       <div className="bg-white shadow-md rounded-lg overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
@@ -126,7 +158,17 @@ export default function UsersPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {/* --- CORRECCIÓN: Mapeo sobre 'users' --- */}
-            {users.map((user) => (
+            {users
+              .filter((u) => {
+                const ql = q.trim().toLowerCase();
+                const matchesQ = !ql ||
+                  `${u.first_name} ${u.last_name}`.toLowerCase().includes(ql) ||
+                  u.username.toLowerCase().includes(ql) ||
+                  (u.email || '').toLowerCase().includes(ql);
+                const matchesRole = !roleFilter || u.role === roleFilter;
+                return matchesQ && matchesRole;
+              })
+              .map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   {/* --- CORRECCIÓN: usa 'user' --- */}
@@ -139,7 +181,7 @@ export default function UsersPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {user.phone || 'N/A'}
                 </td>
-                 <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       user.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-800' :
                       user.role === 'OPERATOR' ? 'bg-yellow-100 text-yellow-800' :
@@ -157,7 +199,7 @@ export default function UsersPage() {
                     {user.is_active ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => handleOpenEditModal(user)} // --- CORRECCIÓN ---
                     className="text-[#FF9800] hover:text-[#FB8C00] mr-3"

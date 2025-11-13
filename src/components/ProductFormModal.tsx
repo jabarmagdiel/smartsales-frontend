@@ -23,6 +23,7 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
     stock: 0, // <-- CORREGIDO (antes 'stock_actual')
     min_stock: 10,
     precio: '0.00',
+    warranty_months: 12, // Garantía por defecto de 12 meses
     categoria_id: 0, 
   };
 
@@ -30,6 +31,8 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const isEditMode = productToEdit !== null;
 
@@ -59,11 +62,20 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
           stock: productToEdit.stock,
           min_stock: productToEdit.min_stock,
           precio: productToEdit.precio,
+          warranty_months: productToEdit.warranty_months || 12,
           categoria_id: productToEdit.categoria.id,
         });
+        // Si ya existe imagen, mostrar preview si viene como URL
+        if ((productToEdit as any).image) {
+          setImagePreview((productToEdit as any).image as unknown as string);
+        } else {
+          setImagePreview(null);
+        }
       } else {
         // Limpia el formulario si estamos en modo "Crear"
         setFormData(initialState);
+        setImageFile(undefined);
+        setImagePreview(null);
       }
       setError(null);
     }
@@ -92,9 +104,9 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
 
     try {
       if (isEditMode) {
-        await updateProduct(productToEdit.id, formData);
+        await updateProduct(productToEdit.id, formData, imageFile);
       } else {
-        await createProduct(formData);
+        await createProduct(formData, imageFile);
       }
       onSave(); 
       onClose(); 
@@ -102,6 +114,17 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
       setError(err.message || 'Error al guardar. Revisa los campos.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setImageFile(file);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    } else {
+      setImagePreview(null);
     }
   };
 
@@ -164,7 +187,7 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
             />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label htmlFor="precio" className="block text-sm font-medium text-gray-700">Precio (Bs)</label>
               <input
@@ -196,6 +219,19 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
                 required
               />
             </div>
+
+            <div>
+              <label htmlFor="warranty_months" className="block text-sm font-medium text-gray-700">Garantía (meses)</label>
+              <input
+                type="number" name="warranty_months" id="warranty_months"
+                value={formData.warranty_months}
+                onChange={handleChange}
+                min="0"
+                max="120"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900"
+                required
+              />
+            </div>
           </div>
           
           <div>
@@ -207,6 +243,22 @@ const ProductFormModal: React.FC<Props> = ({ isOpen, onClose, onSave, productToE
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900"
             />
+          </div>
+
+          <div>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700">Imagen del producto</label>
+            <input
+              type="file"
+              id="image"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="mt-1 block w-full text-gray-900"
+            />
+            {imagePreview && (
+              <div className="mt-2">
+                <img src={imagePreview} alt="Vista previa" className="h-32 w-32 object-cover rounded border" />
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t mt-6">

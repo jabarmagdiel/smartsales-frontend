@@ -4,6 +4,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { getProducts, deleteProduct, IProduct } from '@/services/productService'; 
+import { addToCart } from '@/services/cartService';
+import { addProductPrice } from '@/services/priceService';
+
 import ProductFormModal from '@/components/ProductFormModal'; 
 
 export default function ProductsPage() {
@@ -14,6 +17,7 @@ export default function ProductsPage() {
   // --- ESTADO PARA MANEJAR EL MODAL (CREAR/EDITAR) ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<IProduct | null>(null);
+  const [actionMsg, setActionMsg] = useState<string | null>(null);
 
   // Función para cargar/refrescar los productos
   const fetchProducts = async () => {
@@ -26,6 +30,29 @@ export default function ProductsPage() {
       setError(err.message || 'No se pudieron cargar los productos.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddToCart = async (id: number) => {
+    try {
+      await addToCart(id, 1);
+      setActionMsg('Producto añadido al carrito');
+      setTimeout(() => setActionMsg(null), 2000);
+    } catch (err: any) {
+      setError(err.message || 'No se pudo añadir al carrito');
+    }
+  };
+
+  const handleQuickPrice = async (product: IProduct) => {
+    const val = window.prompt('Nuevo precio (ej. 99.90):', (product as any).precio || '');
+    if (!val) return;
+    try {
+      await addProductPrice(product.id, { price: String(val) });
+      setActionMsg('Precio actualizado');
+      setTimeout(() => setActionMsg(null), 2000);
+      fetchProducts();
+    } catch (err: any) {
+      setError(err.message || 'No se pudo actualizar el precio');
     }
   };
 
@@ -89,12 +116,17 @@ export default function ProductsPage() {
           {error}
         </p>
       )}
+      {actionMsg && (
+        <p className="mb-4 text-center text-green-600 bg-green-100 p-2 rounded-md border border-green-300">
+          {actionMsg}
+        </p>
+      )}
 
       {/* Tabla de Productos (Tailwind CSS - Responsiva) */}
       <div className="bg-white shadow-md rounded-lg overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
-             {/* ... (Encabezados de la tabla) ... */}
+            {/* ... (Encabezados de la tabla) ... */}
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
@@ -109,7 +141,7 @@ export default function ProductsPage() {
             {products.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{product.nombre}</div>
+                  <div className="text-sm font-medium text-gray-900">{(product as any).nombre || product.name}</div>
                   <div className="text-xs text-gray-500">{product.sku || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -128,21 +160,21 @@ export default function ProductsPage() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span 
                     className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      product.stock_actual > (product.min_stock || 10) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      ((product as any).stock_actual ?? product.stock) > (product.min_stock || 10) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {product.stock_actual}
+                    {(product as any).stock_actual ?? product.stock}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {product.precio}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
                   
                   {/* --- BOTÓN DE EDITAR (CONECTADO) --- */}
                   <button 
                     onClick={() => handleOpenEditModal(product)}
-                    className="text-[#FF9800] hover:text-[#FB8C00] mr-3"
+                    className="text-[#FF9800] hover:text-[#FB8C00]"
                   >
                     Editar
                   </button>
@@ -152,6 +184,20 @@ export default function ProductsPage() {
                     className="text-red-600 hover:text-red-800"
                   >
                     Eliminar
+                  </button>
+
+                  <button
+                    onClick={() => handleAddToCart(product.id)}
+                    className="text-[#00BCD4] hover:text-[#0097A7]"
+                  >
+                    Añadir al carrito
+                  </button>
+
+                  <button
+                    onClick={() => handleQuickPrice(product)}
+                    className="text-indigo-600 hover:text-indigo-800"
+                  >
+                    Actualizar precio
                   </button>
                 </td>
               </tr>

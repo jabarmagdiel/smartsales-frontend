@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111111;
 }
 
 @theme inline {
@@ -14,8 +14,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Forzar contraste: mantener fondo claro y texto oscuro también en modo oscuro del SO */
+    --background: #ffffff;
+    --foreground: #111111;
   }
 }
 
