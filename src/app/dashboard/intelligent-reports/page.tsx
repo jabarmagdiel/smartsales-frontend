@@ -158,14 +158,14 @@ export default function IntelligentReportsPage() {
       console.log('🎤 Iniciando reconocimiento de voz...');
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       console.log('🗣️ Transcripción:', transcript);
       setCustomQuery(transcript);
       setIsListening(false);
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('❌ Error en reconocimiento de voz:', event.error);
       setError(`Error en reconocimiento de voz: ${event.error}`);
       setIsListening(false);

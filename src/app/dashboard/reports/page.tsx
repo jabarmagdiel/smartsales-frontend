@@ -45,13 +45,13 @@ export default function ReportsPage() {
           setError(null);
         };
         
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           const speechResult = event.results[0][0].transcript;
           setTranscript(speechResult);
           setPrompt(speechResult);
         };
         
-        recognition.onerror = (event: any) => {
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           setError(`Error de reconocimiento de voz: ${event.error}`);
           setIsListening(false);
         };
