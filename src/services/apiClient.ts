@@ -6,6 +6,10 @@ import { getAccessToken } from './authService'; // Importamos el token
 // 1. Creamos la instancia de Axios
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1',
+  timeout: 30000, // 30 segundos timeout para Railway
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // 2. --- ¡LA SOLUCIÓN AL ERROR 401! ---

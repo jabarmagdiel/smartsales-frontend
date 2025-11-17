@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Optimizaciones para producción
+  // Optimizaciones para Railway
   output: 'standalone',
   
-  // Configuración de imágenes (actualizada para Next.js 16)
+  // Configuración de imágenes para Railway
   images: {
     remotePatterns: [
       {
@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.railway.app',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.up.railway.app',
         pathname: '/media/**',
       },
     ],
@@ -38,9 +43,36 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['axios', 'chart.js'],
   },
   
-  // Configuración de Turbopack (para Next.js 16)
+  // Configuración de Turbopack para Railway
   turbopack: {
-    // Configuración vacía para silenciar la advertencia
+    root: process.cwd(),
+  },
+  
+  // Configuración específica para Railway
+  trailingSlash: false,
+  poweredByHeader: false,
+  
+  // Headers de seguridad para Railway
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
   },
 };
 
