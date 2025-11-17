@@ -94,10 +94,6 @@ export default function DashboardLogsPage() {
   };
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  useEffect(() => {
     fetchLogs(1);
   }, []);
   

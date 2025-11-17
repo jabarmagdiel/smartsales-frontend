@@ -126,3 +126,21 @@ export const downloadReport = async (reportId: number, format: 'pdf' | 'xlsx'): 
     return Promise.reject(error);
   }
 };
+
+/**
+ * Función para obtener el blob del reporte (para compatibilidad con código existente)
+ */
+export const downloadReportFile = async (queryId: number, format: 'pdf' | 'xlsx'): Promise<Blob> => {
+  try {
+    // Nota: Esta función asume que queryId es el mismo que reportId
+    // En una implementación real, podrías necesitar mapear queryId a reportId
+    const blob = format === 'pdf' 
+      ? await exportToPDF(queryId)
+      : await exportToExcel(queryId);
+    
+    return blob;
+  } catch (error) {
+    console.error(`Error getting report file (${format}):`, error);
+    throw error;
+  }
+};
