@@ -1,61 +1,128 @@
 /**
  * Servicio de Reportes (Ciclo 2)
- *
- * Este archivo ha sido refactorizado para utilizar el 'apiClient' centralizado.
- * NO debe importar 'axios' o 'getAccessToken' directamente.
- * 'apiClient' ya incluye el interceptor de autenticación JWT.
+ * 
+ * Este servicio maneja la generación y descarga de reportes en diferentes formatos.
+ * Utiliza el 'apiClient' centralizado que ya incluye el interceptor de autenticación JWT.
  */
 
-// Importamos la instancia centralizada de Axios
 import apiClient from './apiClient';
+import { generateFilename } from '../utils/fileDownload';
 
 // --- Definiciones de Tipos ---
 
-interface QueryResponse {
-  query_id: number; // ID de la consulta guardada
-  results: any[]; // Resultados JSON para la vista en pantalla
-  message: string;
+export interface ReportData {
+  [key: string]: any;
 }
 
-// --- Funciones del Ciclo 2 (Reportes) ---
+export interface GeneratedReport {
+  id: number;
+  title: string;
+  created_at: string;
+  status: string;
+  data: ReportData | ReportData[];
+  query_type?: string;
+}
+
+export interface QueryResponse {
+  query_id: number;
+  results: any[];
+  message: string;
+  report?: GeneratedReport;
+}
+
+// --- Funciones del Servicio ---
 
 /**
- * CU15/CU17: Interpretar el prompt de texto y ejecutar la consulta.
- * @param prompt El prompt de lenguaje natural del usuario.
- * @returns Una promesa que resuelve a los resultados de la consulta y su ID.
+ * Obtiene un reporte por su ID
+ */
+export const getReport = async (reportId: number): Promise<GeneratedReport> => {
+  try {
+    const response = await apiClient.get<GeneratedReport>(`/reports/${reportId}/`);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching report:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.detail || 'Failed to fetch report');
+  }
+};
+
+/**
+ * Obtiene una lista de reportes generados anteriormente
+ */
+export const getGeneratedReports = async (): Promise<GeneratedReport[]> => {
+  try {
+    const response = await apiClient.get<{ results: GeneratedReport[] }>('/reports/');
+    return response.data.results || [];
+  } catch (error: any) {
+    console.error('Error fetching reports:', error.response?.data || error.message);
+    throw new Error('Failed to fetch reports');
+  }
+};
+
+/**
+ * Interpreta un prompt de texto y ejecuta la consulta
  */
 export const generateReportQuery = async (prompt: string): Promise<QueryResponse> => {
   try {
-    // Usamos 'apiClient' en lugar de 'api'
-    const response = await apiClient.post<QueryResponse>('/reportes/query/', { prompt });
+    const response = await apiClient.post<QueryResponse>('/reports/query/', { prompt });
     return response.data;
   } catch (error: any) {
-    console.error("Error generating report query:", error.response?.data || error.message);
-    // Relanzamos el error para que el componente de UI pueda manejarlo
+    console.error('Error generating report query:', error.response?.data || error.message);
     throw new Error(error.response?.data?.detail || 'Failed to interpret prompt');
   }
 };
 
 /**
- * CU18/CU20: Descargar el archivo (PDF o Excel)
- * @param queryId El ID de la consulta generada previamente.
- * @param format El formato deseado ('pdf' o 'xlsx').
- * @returns Una promesa que resuelve a un Blob con los datos del archivo.
+ * Exporta un reporte a PDF
  */
-export const downloadReportFile = async (queryId: number, format: 'pdf' | 'xlsx'): Promise<Blob> => {
+export const exportToPDF = async (reportId: number): Promise<Blob> => {
   try {
-    // Usamos 'apiClient' en lugar de 'api'
-    const response = await apiClient.get(`/reportes/generate/`, {
-      params: {
-        query_id: queryId,
-        formato: format,
-      },
-      responseType: 'blob', // Importante: le dice a Axios que espere un archivo
-    });
-    
+    const response = await apiClient.post(
+      '/reports/export_pdf/',
+      { report_id: reportId },
+      { responseType: 'blob' }
+    );
     return response.data;
   } catch (error: any) {
-    console.error("Error downloading report file:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.detail || `Failed to download ${format} file`);
+    console.error('Error exporting to PDF:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.detail || 'Failed to export to PDF');
+  }
+};
+
+/**
+ * Exporta un reporte a Excel
+ */
+export const exportToExcel = async (reportId: number): Promise<Blob> => {
+  try {
+    const response = await apiClient.post(
+      '/reports/export_excel/',
+      { report_id: reportId },
+      { responseType: 'blob' }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error exporting to Excel:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.detail || 'Failed to export to Excel');
+  }
+};
+
+/**
+ * Función genérica para descargar un reporte en el formato especificado
+ */
+export const downloadReport = async (reportId: number, format: 'pdf' | 'xlsx'): Promise<void> => {
+  try {
+    const blob = format === 'pdf' 
+      ? await exportToPDF(reportId)
+      : await exportToExcel(reportId);
+    
+    const filename = generateFilename(`reporte_${reportId}`, format);
+    
+    // Usar el helper de descarga
+    const { downloadFile } = await import('../utils/fileDownload');
+    downloadFile(blob, filename);
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error(`Error downloading ${format}:`, error);
+    return Promise.reject(error);
   }
 };
