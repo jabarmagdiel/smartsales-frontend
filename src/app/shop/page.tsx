@@ -7,6 +7,7 @@ import { addToCart } from "@/services/cartService";
 import ProductImage from "@/components/ProductImage";
 import ImageDebugger from "@/components/ImageDebugger";
 import ImageTester from "@/components/ImageTester";
+import SimpleImageTest from "@/components/SimpleImageTest";
 
 
 export default function ShopPage() {
@@ -53,6 +54,7 @@ export default function ShopPage() {
       {/* Debug temporal */}
       <ImageDebugger />
       <ImageTester />
+      <SimpleImageTest />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p) => (

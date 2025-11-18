@@ -7,9 +7,10 @@ import { useState } from 'react';
 
 export default function ImageTester() {
   const [testUrls] = useState([
-    'https://smartsales-backend-783403173685.europe-west1.run.app/media/productos/Captura_de_pantalla_2025-11-18_031812.png',
-    'https://smartsales-backend-783403173685.europe-west1.run.app/media/productos/HP_Probook_440_G11_14_Natural_Silver_WML_T_Tec.png',
-    '/media/productos/Captura_de_pantalla_2025-11-18_031812.png',
+    'https://smartsales-backend-783403173685.europe-west1.run.app/media/productos/Captura_de_pantalla_2025-11-18_031428.png',
+    'https://smartsales-backend-783403173685.europe-west1.run.app/media/productos/Captura_de_pantalla_2025-11-18_032516.png',
+    'https://smartsales-backend-783403173685.europe-west1.run.app/media/productos/Captura_de_pantalla_2025-11-18_032485.png',
+    '/media/productos/Captura_de_pantalla_2025-11-18_031428.png',
   ]);
 
   return (

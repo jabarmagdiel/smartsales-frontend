@@ -28,19 +28,16 @@ const getImageUrl = (imageUrl: string | null | undefined): string => {
     return imageUrl;
   }
   
-  // Construir URL completa del backend
+  // Si es una ruta relativa, construir URL completa del backend
   const baseUrl = process.env.NODE_ENV === 'production' 
     ? 'https://smartsales-backend-783403173685.europe-west1.run.app'
     : 'http://localhost:8000';
-  
-  console.log('ProductImage: Environment:', process.env.NODE_ENV);
-  console.log('ProductImage: Base URL:', baseUrl);
   
   // Asegurar que la URL esté bien formada
   const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
   const fullUrl = `${baseUrl}${cleanImageUrl}`;
   
-  console.log('ProductImage: Constructed URL:', fullUrl, 'from:', imageUrl);
+  console.log('ProductImage: Constructed URL:', fullUrl, 'from relative path:', imageUrl);
   return fullUrl;
 };
 
