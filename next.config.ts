@@ -11,20 +11,27 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',
-        pathname: '/media/**',
+        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'smartsales-backend-783403173685.europe-west1.run.app',
-        pathname: '/media/**',
+        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: '*.run.app',
-        pathname: '/media/**',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleapis.com',
+        pathname: '/**',
       },
     ],
-    unoptimized: false // Habilitar optimización de imágenes en Vercel
+    unoptimized: false, // Habilitar optimización de imágenes en Vercel
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
   // Variables de entorno públicas

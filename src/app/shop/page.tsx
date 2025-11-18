@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getProducts, type IProduct } from "@/services/productService";
 import { addToCart } from "@/services/cartService";
+import ProductImage from "@/components/ProductImage";
+
 
 export default function ShopPage() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -49,13 +51,14 @@ export default function ShopPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p) => (
           <div key={p.id} className="bg-white rounded shadow overflow-hidden flex flex-col">
-            <div className="relative w-full h-40 bg-gray-50 flex items-center justify-center">
-              {p.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.image} alt={p.name} className="max-h-40 object-contain" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">Sin imagen</div>
-              )}
+            <div className="relative w-full h-40 bg-gray-50">
+              <ProductImage 
+                src={p.image} 
+                alt={p.name} 
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
             </div>
             <div className="p-4 flex-1 flex flex-col">
               <div className="text-xs uppercase text-gray-500">{p.categoria?.nombre || ""}</div>
