@@ -61,14 +61,83 @@ export const getAccessToken = (): string | null => {
   return null;
 };
 
+export const getRefreshToken = (): string | null => {
+  if (isClient()) {
+    return localStorage.getItem('refresh_token');
+  }
+  return null;
+};
+
+// Función para verificar si el token está expirado
+export const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded: any = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    return decoded.exp < currentTime;
+  } catch (e) {
+    return true; // Si no se puede decodificar, considerarlo expirado
+  }
+};
+
+// Función para refrescar el token automáticamente
+export const refreshToken = async (): Promise<string | null> => {
+  const refresh = getRefreshToken();
+  if (!refresh) {
+    throw new Error('No refresh token available');
+  }
+
+  try {
+    const response = await api.post<TokenResponse>('/token/refresh/', {
+      refresh: refresh
+    });
+
+    const { access } = response.data;
+    
+    if (isClient()) {
+      localStorage.setItem('access_token', access);
+      // Si el backend devuelve un nuevo refresh token, guardarlo también
+      if (response.data.refresh) {
+        localStorage.setItem('refresh_token', response.data.refresh);
+      }
+    }
+    
+    return access;
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    // Si falla el refresh, hacer logout
+    logout();
+    throw error;
+  }
+};
+
+// Función para obtener un token válido (refresh automático si es necesario)
+export const getValidToken = async (): Promise<string | null> => {
+  const token = getAccessToken();
+  
+  if (!token) {
+    return null;
+  }
+  
+  // Si el token no está expirado, devolverlo
+  if (!isTokenExpired(token)) {
+    return token;
+  }
+  
+  // Si está expirado, intentar refrescarlo
+  try {
+    return await refreshToken();
+  } catch (error) {
+    console.error('Failed to refresh token:', error);
+    return null;
+  }
+};
+
 export const getRoleFromToken = (): string | null => {
   const token = getAccessToken();
-  if (token) {
+  if (token && !isTokenExpired(token)) {
     try {
       const decoded: any = jwtDecode(token);
-
-      // Lee la clave 'role' que inyectó el backend
-      return decoded.role || 'Rol Desconocido'; // Fallback seguro
+      return decoded.role || 'Rol Desconocido';
     } catch (e) {
       console.error("Error decoding token:", e);
       return null;
