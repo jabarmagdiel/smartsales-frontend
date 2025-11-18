@@ -46,37 +46,9 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['axios', 'chart.js'],
   },
   
-  // Configuración de Turbopack para Railway
-  turbopack: {
-    root: process.cwd(),
-  },
-  
-  // Configuración específica para Railway
+  // Configuración específica para Vercel
   trailingSlash: false,
   poweredByHeader: false,
-  
-  // Headers de seguridad para Railway
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-        ],
-      },
-    ];
-  },
 };
 
 export default nextConfig;
