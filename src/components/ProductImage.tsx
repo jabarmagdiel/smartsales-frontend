@@ -17,14 +17,10 @@ interface ProductImageProps {
 
 // Función para construir URL completa de imagen
 const getImageUrl = (imageUrl: string | null | undefined): string => {
-  if (!imageUrl) {
-    console.log('ProductImage: No imageUrl provided');
-    return '';
-  }
+  if (!imageUrl) return '';
   
   // Si ya es una URL completa, devolverla tal como está
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-    console.log('ProductImage: Using absolute URL:', imageUrl);
     return imageUrl;
   }
   
@@ -37,7 +33,6 @@ const getImageUrl = (imageUrl: string | null | undefined): string => {
   const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
   const fullUrl = `${baseUrl}${cleanImageUrl}`;
   
-  console.log('ProductImage: Constructed URL:', fullUrl, 'from relative path:', imageUrl);
   return fullUrl;
 };
 
