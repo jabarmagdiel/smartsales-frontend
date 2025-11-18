@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Optimizaciones para Railway
-  output: 'standalone',
+  // Optimizaciones para Vercel (sin standalone)
+  // output: 'standalone', // Comentado para Vercel
   
-  // Configuración de imágenes para Railway
+  // Configuración de imágenes para Google Cloud
   images: {
     remotePatterns: [
       {
@@ -15,16 +15,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.railway.app',
+        hostname: 'smartsales-backend-783403173685.europe-west1.run.app',
         pathname: '/media/**',
       },
       {
         protocol: 'https',
-        hostname: '*.up.railway.app',
+        hostname: '*.run.app',
         pathname: '/media/**',
       },
     ],
-    unoptimized: true
+    unoptimized: false // Habilitar optimización de imágenes en Vercel
   },
   
   // Variables de entorno públicas

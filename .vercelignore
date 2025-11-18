@@ -1,0 +1,8 @@
+# Archivos que Vercel debe ignorar
+node_modules
+.next
+.env.local
+.env*.local
+*.log
+.DS_Store
+README.md
