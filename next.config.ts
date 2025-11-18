@@ -29,7 +29,10 @@ const nextConfig: NextConfig = {
   
   // Variables de entorno públicas
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1',
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://smartsales-backend-783403173685.europe-west1.run.app/api/v1'
+        : 'http://localhost:8000/api/v1'),
     NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
   },
   

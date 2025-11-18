@@ -5,8 +5,11 @@ import { getAccessToken } from './authService'; // Importamos el token
 
 // 1. Creamos la instancia de Axios
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1',
-  timeout: 30000, // 30 segundos timeout para Railway
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 
+    (process.env.NODE_ENV === 'production' 
+      ? 'https://smartsales-backend-783403173685.europe-west1.run.app/api/v1'
+      : 'http://localhost:8000/api/v1'),
+  timeout: 30000, // 30 segundos timeout
   headers: {
     'Content-Type': 'application/json',
   },

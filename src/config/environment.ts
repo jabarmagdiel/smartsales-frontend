@@ -16,7 +16,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // Configuración por defecto
 const defaultConfig: EnvironmentConfig = {
-  apiBaseUrl: 'http://localhost:8000/api/v1',
+  apiBaseUrl: isProduction 
+    ? 'https://smartsales-backend-783403173685.europe-west1.run.app/api/v1'
+    : 'http://localhost:8000/api/v1',
   frontendUrl: 'http://localhost:3000',
   isDevelopment,
   isProduction,

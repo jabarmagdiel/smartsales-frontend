@@ -8,7 +8,10 @@ const isClient = () => typeof window !== 'undefined';
 
 // 1. Configuración de Axios
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 
+    (process.env.NODE_ENV === 'production' 
+      ? 'https://smartsales-backend-783403173685.europe-west1.run.app/api/v1'
+      : 'http://localhost:8000/api/v1'),
 });
 
 // Interfaz para la respuesta exitosa del Login JWT
