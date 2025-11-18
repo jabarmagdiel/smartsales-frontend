@@ -17,20 +17,31 @@ interface ProductImageProps {
 
 // Función para construir URL completa de imagen
 const getImageUrl = (imageUrl: string | null | undefined): string => {
-  if (!imageUrl) return '';
+  if (!imageUrl) {
+    console.log('ProductImage: No imageUrl provided');
+    return '';
+  }
   
   // Si ya es una URL completa, devolverla tal como está
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    console.log('ProductImage: Using absolute URL:', imageUrl);
     return imageUrl;
   }
   
-  // Si es una ruta relativa, construir URL completa
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api/v1', '') || 
-    (process.env.NODE_ENV === 'production' 
-      ? 'https://smartsales-backend-783403173685.europe-west1.run.app'
-      : 'http://localhost:8000');
+  // Construir URL completa del backend
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://smartsales-backend-783403173685.europe-west1.run.app'
+    : 'http://localhost:8000';
   
-  return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  console.log('ProductImage: Environment:', process.env.NODE_ENV);
+  console.log('ProductImage: Base URL:', baseUrl);
+  
+  // Asegurar que la URL esté bien formada
+  const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+  const fullUrl = `${baseUrl}${cleanImageUrl}`;
+  
+  console.log('ProductImage: Constructed URL:', fullUrl, 'from:', imageUrl);
+  return fullUrl;
 };
 
 export default function ProductImage({ 
