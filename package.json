@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "npm dev",
+    "build": "npm build",
+    "start": "npm start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build:analyze": "ANALYZE=true npm run build",
+    "prebuild:check": "node scripts/prebuild.js"
   },
-
   "dependencies": {
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
