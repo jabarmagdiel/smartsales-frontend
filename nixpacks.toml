@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = [
+  "npm config set fetch-retry-maxtimeout 120000",
+  "npm config set fetch-retry-mintimeout 10000",
+  "npm config set fetch-retries 5",
+  "npm install --verbose --legacy-peer-deps"
+]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
